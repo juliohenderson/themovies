@@ -6,11 +6,13 @@ import configureStore from './configureStore';
 import * as serviceWorker from './serviceWorker';
 
 import './index.css';
+import { Header } from './components';
 import Home from './scenes/home';
 const store = configureStore();
 
 ReactDOM.render(
   <Provider store={store}>
+    <Header />
     <Router>
       <Route path="/" exact component={Home} />
     </Router>
