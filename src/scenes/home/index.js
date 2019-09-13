@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { InfiniteLoader, List, AutoSizer } from 'react-virtualized';
+import InfiniteScroll from 'react-infinite-scroller';
+import { Loading } from '../../components';
+import debounce from '../../utils/debounce';
 
 import { URL_IMAGE, IMAGE_SIZE_300 } from '../../constants';
-import { getMovies } from './redux/actions';
+import { getMovies, findMovie } from './redux/actions';
 import Scene from '../Scene';
 
 const ListMovies = styled.div`
@@ -13,15 +15,25 @@ const ListMovies = styled.div`
   max-width: 100vw;
   flex-wrap: wrap;
   height: 100vh;
+
+  @media(min-width: 768px) {
+    width: 80vw;
+  }
 `;
 
 const Movie = styled.div`
-  flex: 1 1 33%;
   padding: 15px;
   display: flex;
   justify-content: center;
   flex-direction: column;
-  max-width: 32%;
+  flex: 1;
+
+  @media(min-width: 768px) {
+    width: 30%;
+  }
+  @media(min-width: 425px) and (max-width: 767px) {
+    width: 46%;
+  }
 `;
 
 const Poster = styled.img`
@@ -31,75 +43,76 @@ const Poster = styled.img`
 `;
 
 class Home extends Component {
-  isRowLoaded({ index }, list) {
-    return !!list[index];
-  }
-
-  loadMoreRows(fetchMovies, page) {
-    fetchMovies(page + 1);
-  }
-
-  rowRenderer({ key, index }, list) {
-    return (
-      (list.length > 0 && key && index && list[index]) && (
-      <Movie key={key}>
-        {list[index].poster_path && <Poster src={`${URL_IMAGE}/${IMAGE_SIZE_300}${list[index].poster_path}`} alt={list[index].title} />}
-        <h2 css={`text-align: center`}>{list[index].title}</h2>
-        <p>{`${list[index].overview.substring(0, 300)}...`}</p>
-      </Movie>
-      )
-    );
-  }
-
-  UNSAFE_componentWillMount() {
-    this.props.fetchMovies(1);
+  loadMore() {
+    const {
+      fetchMovies, page, totalPages, searchText, searchMovie,
+    } = this.props;
+    if (page < totalPages || page === 0) {
+      if (searchText) {
+        debounce(searchMovie(searchText, page + 1), 500);
+      } else {
+        debounce(fetchMovies(page + 1), 500);
+      }
+    }
   }
 
   render() {
-    const { list, page, fetchMovies } = this.props;
+    const { list } = this.props;
+    const items = [];
+    if (list.length > 0) {
+      list.forEach((movie) => {
+        items.push(
+          <Movie key={movie.id}>
+            {movie.poster_path && <Poster src={`${URL_IMAGE}/${IMAGE_SIZE_300}${movie.poster_path}`} alt={movie.title} />}
+            <h2
+              css={`
+                text-align: center; color: #028090;
+              `}
+            >
+              {movie.title}
+            </h2>
+            <p>{`${movie.overview.substring(0, 300)}...`}</p>
+          </Movie>
+        );
+      });
+    }
+
     return (
       <Scene>
+        {list.length < 1 && <Loading />}
         <ListMovies>
-          <InfiniteLoader
-            isRowLoaded={(props) => this.isRowLoaded(props, list)}
-            loadMoreRows={() => this.loadMoreRows(fetchMovies, page)}
-            rowCount={10000}
+          <InfiniteScroll
+            pageStart={0}
+            loadMore={() => this.loadMore()}
+            hasMore
+            initialLoad
+            threshold={700}
+            css={`
+              display: flex;
+              flex-wrap: wrap;
+            `}
           >
-            {({ onRowsRendered, registerChild }) => (
-              <AutoSizer>
-                {({ width, height }) => (
-                  <List
-                    onRowsRendered={onRowsRendered}
-                    ref={registerChild}
-                    rowCount={10000}
-                    rowRenderer={(props) => this.rowRenderer(props, list)}
-                    width={width}
-                    height={height}
-                    rowHeight={731}
-                    // containerStyle={{
-                    //   display: 'flex',
-                    //   flexWrap: 'wrap',
-                    //   height: 'auto',
-                    // }}
-                    overscanRowCount={10}
-                  />
-                )}
-              </AutoSizer>
-            )}
-          </InfiniteLoader>
+            {items}
+          </InfiniteScroll>
         </ListMovies>
       </Scene>
     );
   }
 }
 
-Home.propType = {
+Home.propTypes = {
   list: PropTypes.array,
+  fetchMovies: PropTypes.func,
+  page: PropTypes.number,
+  totalPages: PropTypes.number,
+  searchText: PropTypes.string,
+  searchMovie: PropTypes.func,
 };
 
 const mapStateToProps = (state) => state.homeReducer;
 const mapDispatchToProps = (dispatch) => ({
   fetchMovies: (page) => dispatch(getMovies(page)),
+  searchMovie: (searchText, page) => dispatch(findMovie(searchText, page)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
