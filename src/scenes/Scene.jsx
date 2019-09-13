@@ -6,9 +6,9 @@ const Scene = ({ children }) => (
     css={`
       display: flex;
       justify-content: center;
-      padding-top: 68px;
       background: #f1f1f1;
       min-height: 100%;
+      padding-top: 55px;
     `}
   >
     {children}
@@ -16,7 +16,7 @@ const Scene = ({ children }) => (
 );
 
 Scene.propTypes = {
-  children: PropTypes.object,
+  children: PropTypes.node.isRequired,
 };
 
 export default Scene;
