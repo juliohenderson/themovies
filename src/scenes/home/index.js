@@ -83,7 +83,7 @@ class Home extends Component {
         );
       });
     }
-
+    console.log(list);
     return (
       <Scene>
         {list.length < 1 && <Loading />}
