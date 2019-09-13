@@ -12,8 +12,8 @@ const store = configureStore();
 
 ReactDOM.render(
   <Provider store={store}>
-    <Header />
     <Router>
+      <Header />
       <Route path="/" exact component={Home} />
     </Router>
   </Provider>,

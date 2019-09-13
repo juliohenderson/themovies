@@ -27,6 +27,7 @@ const Movie = styled.div`
   justify-content: center;
   flex-direction: column;
   flex: 1;
+  align-items: center;
 
   @media(min-width: 768px) {
     width: 30%;
@@ -37,9 +38,9 @@ const Movie = styled.div`
 `;
 
 const Poster = styled.img`
-  min-height: 451px;
   height: auto;
   border-radius: 5px;
+  width: max-content;
 `;
 
 class Home extends Component {
@@ -71,7 +72,13 @@ class Home extends Component {
             >
               {movie.title}
             </h2>
-            <p>{`${movie.overview.substring(0, 300)}...`}</p>
+            <p
+              css={`
+                flex: 1;
+              `}
+            >
+              {movie.overview ? `${movie.overview.substring(0, 300)}...` : ''}
+            </p>
           </Movie>
         );
       });
