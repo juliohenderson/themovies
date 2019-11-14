@@ -9,12 +9,10 @@ import debounce from '../../utils/debounce';
 import { URL_IMAGE, IMAGE_SIZE_300 } from '../../constants';
 import { getMovies, findMovie } from './redux/actions';
 import Scene from '../Scene';
+import IconSvg from '../../assets/information.svg';
 
-const ListMovies = styled.div`
-  display: flex;
-  max-width: 100vw;
-  flex-wrap: wrap;
-  height: 100vh;
+const ListMovies = styled.ul`
+  padding: 0px;
 
   @media(min-width: 768px) {
     width: 80vw;
@@ -22,25 +20,17 @@ const ListMovies = styled.div`
 `;
 
 const Movie = styled.div`
-  padding: 15px;
   display: flex;
-  justify-content: center;
   flex-direction: column;
-  flex: 1;
   align-items: center;
-
-  @media(min-width: 768px) {
-    width: 30%;
-  }
-  @media(min-width: 425px) and (max-width: 767px) {
-    width: 46%;
-  }
+  background: #101010;
+  border-radius: 5px;
 `;
 
 const Poster = styled.img`
-  height: auto;
   border-radius: 5px;
-  width: max-content;
+  width: 300px;
+  height: 450px;
 `;
 
 class Home extends Component {
@@ -65,25 +55,68 @@ class Home extends Component {
         items.push(
           <Movie key={movie.id}>
             {movie.poster_path && <Poster src={`${URL_IMAGE}/${IMAGE_SIZE_300}${movie.poster_path}`} alt={movie.title} />}
-            <h2
+            <div
               css={`
-                text-align: center; color: #028090;
+                position: relative;
+                display: flex;
+                align-self: start;
+                margin-bottom: 5px;
               `}
             >
-              {movie.title}
-            </h2>
-            <p
+              <span
+                css={`
+                  position: absolute;
+                  display: flex;
+                  background: #e50914;
+                  border-radius: 15px;
+                  color: #fff;
+                  font-weight: 600;
+                  width: 90px;
+                  height: 25px;
+                  justify-content: center;
+                  align-items: center;
+                  TOP: -13px;
+                  left: 15px;
+                `}
+              >Nota: {movie.vote_average}</span>
+              <span>
+                <object type="image/svg+xml" data={IconSvg} className="logo">
+                  Kiwi Logo {/* <!-- fallback image in CSS --> */}
+                </object>
+              </span>
+            </div>
+            <footer
               css={`
                 flex: 1;
+                padding: 15px 20px;
+                border-radius: 0 0 5px 5px;
+                text-align: center;
               `}
             >
-              {movie.overview ? `${movie.overview.substring(0, 300)}...` : ''}
-            </p>
+              <strong
+                css={`
+                  color: #E50914;
+                `}
+              >
+                {movie.title}
+              </strong>
+              <p
+                css={`
+                  font-size: 14px;
+                  line-height: 20px;
+                  color: #fff;
+                  margin-top: 5px;
+                  text-align: justify;
+                `}
+              >
+                {movie.overview ? `${movie.overview.substring(0, 300)}...` : ''}
+              </p>
+            </footer>
           </Movie>
         );
       });
     }
-    console.log(list);
+
     return (
       <Scene>
         {list.length < 1 && <Loading />}
@@ -95,8 +128,11 @@ class Home extends Component {
             initialLoad
             threshold={700}
             css={`
-              display: flex;
-              flex-wrap: wrap;
+              list-style: none;
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              grid-gap: 30px;
+              margin-top: 50px;
             `}
           >
             {items}

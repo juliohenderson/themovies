@@ -6,7 +6,7 @@ const Scene = ({ children }) => (
     css={`
       display: flex;
       justify-content: center;
-      background: #f1f1f1;
+      background: #141414;
       min-height: 100%;
       padding-top: 55px;
     `}
